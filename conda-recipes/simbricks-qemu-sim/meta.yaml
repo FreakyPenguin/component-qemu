@@ -1,0 +1,42 @@
+{% set name = "simbricks-qemu-sim" %}
+{% set version = "0.4.2" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  # Build straight from the in-tree python package located next to this recipe.
+  path: ../../qemu_sim
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python >=3.10
+    - poetry-core >=1.0.0
+    - pip
+  run:
+    - python >=3.10
+    - simbricks-orchestration >=0.4.2
+    - simbricks-utils >=0.4.2
+    - typing_extensions >=4.14.1
+
+test:
+  imports:
+    - simbricks.components.qemu.simulation
+
+about:
+  home: https://www.simbricks.io/
+  license: MIT
+  summary: QEMU integration into SimBricks
+  description: |
+    Python package providing the QEMU simulator integration for SimBricks.
+  dev_url: https://github.com/simbricks/simbricks
+
+extra:
+  recipe-maintainers:
+    - Team SimBricks <team@simbricks.io>
