@@ -20,44 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-{% set name = "simbricks-qemu-python" %}
+# Recipe-specific build matrix for the compiled simbricks-qemu-bin package.
+# conda-build auto-merges this with the shared conda-recipes/conda_build_config.yaml
+# passed via `-m`. These selectors drive the {{ compiler('c') }},
+# {{ compiler('cxx') }}, and {{ stdlib('c') }} pins in meta.yaml.
 
-package:
-  name: {{ name|lower }}
-  version: {{ simbricks_version }}
-
-source:
-  # Build straight from the in-tree python package located at the repo root.
-  path: ../../simbricks-qemu-python
-
-build:
-  noarch: python
-  number: 0
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-
-requirements:
-  host:
-    - python >=3.10
-    - poetry-core >=1.0.0
-    - pip
-  run:
-    - python >=3.10
-    - simbricks-orchestration >=0.4.2
-    - simbricks-utils >=0.4.2
-    - typing_extensions >=4.14.1
-
-test:
-  imports:
-    - simbricks.components.qemu.simulation
-
-about:
-  home: {{ homepage }}
-  license: MIT
-  summary: QEMU integration into SimBricks
-  description: |
-    Python package providing the QEMU simulator integration for SimBricks.
-  dev_url: {{ github_org }}
-
-extra:
-  recipe-maintainers:
-    - Team SimBricks <team@simbricks.io>
+c_compiler:
+  - gcc
+c_compiler_version:
+  - "13"
+cxx_compiler:
+  - gxx
+cxx_compiler_version:
+  - "13"
+target_platform:
+  - linux-64
+c_stdlib:
+  - sysroot
+c_stdlib_version:
+  - "2.17"

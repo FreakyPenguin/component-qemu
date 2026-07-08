@@ -20,44 +20,54 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-{% set name = "simbricks-qemu-python" %}
-
 package:
-  name: {{ name|lower }}
+  name: simbricks-qemu-bin
   version: {{ simbricks_version }}
 
 source:
-  # Build straight from the in-tree python package located at the repo root.
-  path: ../../simbricks-qemu-python
+  # Build from the repo root, which holds the top-level Makefile and the qemu/
+  # submodule with the QEMU C sources.
+  path: ../../
+  patches:
+    - fix-typedef-object-c.patch
 
 build:
-  noarch: python
   number: 0
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
-  host:
-    - python >=3.10
-    - poetry-core >=1.0.0
-    - pip
-  run:
-    - python >=3.10
-    - simbricks-orchestration >=0.4.2
-    - simbricks-utils >=0.4.2
-    - typing_extensions >=4.14.1
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ stdlib('c') }}
+    - make
+    - meson
+    - ninja
+    - pkg-config
+    - flex
+    - bison
+    - python
+    - setuptools
 
-test:
-  imports:
-    - simbricks.components.qemu.simulation
+  host:
+    - simbricks-lib >=0.4.2
+    - glib
+    - pixman
+    - zlib
+    - libpcap
+    - elfutils
+    - python
+    - setuptools
+
+  run:
+    # Pull in the SimBricks QEMU python integration so that installing the
+    # simulator binary also provides its orchestration glue.
+    - simbricks-qemu-python =={{ simbricks_version }}
 
 about:
   home: {{ homepage }}
-  license: MIT
-  summary: QEMU integration into SimBricks
-  description: |
-    Python package providing the QEMU simulator integration for SimBricks.
+  license: GPL-2.0-or-later
+  license_family: GPL2
+  license_file:
+    - qemu/LICENSE
+  summary: SimBricks-adapted QEMU simulator for full-system simulation.
   dev_url: {{ github_org }}
-
-extra:
-  recipe-maintainers:
-    - Team SimBricks <team@simbricks.io>
