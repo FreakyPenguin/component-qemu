@@ -42,3 +42,23 @@ jobs:
               --upload-file "$pkg" \
               "https://conda.simbricks.io/latest/$dest"
           done
+
+  trigger-indexing:
+    name: Trigger indexing of the conda channel to add the uploaded packages to the index
+    runs-on: self-hosted
+
+    container:
+      image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
+      options: --user root
+
+    steps:
+      - name: Trigger indexing
+        shell: bash
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --request POST \
+            --form "token=$REGISTRY_TOKEN" \
+            --form ref=main \
+            --url "https://gitlab.simbricks.io/api/v4/projects/23/trigger/pipeline"
