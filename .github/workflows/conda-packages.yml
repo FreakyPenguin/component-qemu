@@ -1,0 +1,41 @@
+# Build the conda packages (`make conda-packages`) inside a container and upload
+# the resulting artifacts to a package registry.
+name: conda-packages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and upload conda packages
+    runs-on: self-hosted
+
+    container:
+      image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
+
+    steps:
+      - name: Checkout (with QEMU submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build conda packages
+        run: make conda-packages OUTPUT_FOLDER=./conda-out
+
+      - name: Upload packages to registry
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s globstar nullglob
+          for pkg in conda-out/**/*.conda; do
+            echo "Uploading $pkg"
+            curl --fail --silent --show-error --follow \
+              --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
+              --upload-file "$pkg" \
+              "https://conda.simbricks.io/latest/$(basename "$pkg")"
+          done
