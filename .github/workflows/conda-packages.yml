@@ -35,9 +35,10 @@ jobs:
           set -euo pipefail
           shopt -s globstar nullglob
           for pkg in conda-out/**/*.conda; do
-            echo "Uploading $pkg"
+            dest="${pkg#conda-out/}"
+            echo "Uploading $pkg -> $dest"
             curl --fail --silent --show-error --location \
               --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
               --upload-file "$pkg" \
-              "https://conda.simbricks.io/latest/$(basename "$pkg")"
+              "https://conda.simbricks.io/latest/$dest"
           done
