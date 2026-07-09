@@ -36,7 +36,7 @@ jobs:
           shopt -s globstar nullglob
           for pkg in conda-out/**/*.conda; do
             echo "Uploading $pkg"
-            curl --fail --silent --show-error --follow \
+            curl --fail --silent --show-error --location \
               --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
               --upload-file "$pkg" \
               "https://conda.simbricks.io/latest/$(basename "$pkg")"
