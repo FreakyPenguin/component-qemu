@@ -59,6 +59,5 @@ jobs:
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --request POST \
-            --form "token=$REGISTRY_TOKEN" \
-            --form ref=main \
-            --url "https://gitlab.simbricks.io/api/v4/projects/23/trigger/pipeline"
+            --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
+            --url "https://gitlab.simbricks.io/api/v4/projects/23/pipeline?ref=main"
