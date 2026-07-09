@@ -46,6 +46,7 @@ jobs:
   trigger-indexing:
     name: Trigger indexing of the conda channel to add the uploaded packages to the index
     runs-on: self-hosted
+    needs: build
 
     container:
       image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
