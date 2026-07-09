@@ -28,6 +28,7 @@ jobs:
         run: make conda-packages OUTPUT_FOLDER=./conda-out
 
       - name: Upload packages to registry
+        shell: bash
         env:
           REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: |
