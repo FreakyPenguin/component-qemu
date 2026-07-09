@@ -17,6 +17,9 @@ jobs:
       image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
 
     steps:
+      - name: Install nodejs
+        run: sudo apt update && sudo apt install -y nodejs
+
       - name: Checkout (with QEMU submodule)
         uses: actions/checkout@v4
         with:
