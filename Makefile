@@ -96,6 +96,15 @@ qemu-conda: python-conda
 # Build both conda packages in dependency order.
 conda-packages: python-conda qemu-conda
 
+## --- PyPI packages ---------------------------------------------------------
+
+pypi-build:
+	rm -rf simbricks-qemu-python/dist
+	poetry build -C simbricks-qemu-python
+
+pypi-publish: pypi-build
+	poetry publish -C simbricks-qemu-python
+
 ## --- Default target ----------------------------------------------------------
 
 # Default: local dev build of both halves.
