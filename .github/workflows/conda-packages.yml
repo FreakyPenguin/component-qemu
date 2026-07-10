@@ -1,5 +1,3 @@
-# Build the conda packages (`make conda-packages`) inside a container and upload
-# the resulting artifacts to a package registry.
 name: conda-packages
 
 on:
@@ -9,89 +7,7 @@ on:
       - release
   workflow_dispatch:
 
-env:
-  CHANNEL: ${{ github.ref_name == 'release' && 'stable' || 'latest' }}
-
 jobs:
-  build:
-    name: Build and upload conda packages
-    runs-on: [self-hosted, dedicated-1]
-
-    container:
-      image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
-      options: --user root
-
-    steps:
-      - name: Checkout (with QEMU submodule)
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Build conda packages
-        run: make conda-packages OUTPUT_FOLDER=./conda-out
-
-      - name: Upload packages to registry
-        shell: bash
-        env:
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-        run: |
-          set -euo pipefail
-          shopt -s globstar nullglob
-          for pkg in conda-out/**/*.conda; do
-            dest="${pkg#conda-out/}"
-            echo "Uploading $pkg -> $dest"
-            curl --fail --silent --show-error --location \
-              --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
-              --upload-file "$pkg" \
-              "https://conda.simbricks.io/$CHANNEL/$dest"
-          done
-
-  trigger-indexing:
-    name: Trigger indexing of the conda channel to add the uploaded packages to the index
-    runs-on: [self-hosted, dedicated-1]
-    needs: build
-
-    container:
-      image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
-      options: --user root
-
-    steps:
-      - name: Trigger indexing
-        shell: bash
-        env:
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --request POST \
-            --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
-            --header "Content-Type: application/json" \
-            --url "https://gitlab.simbricks.io/api/v4/projects/23/pipeline?ref=main" \
-            --data "{\"inputs\": {\"channel\": \"$CHANNEL\"}}"
-
-  pypi-publish:
-    name: Publish the python package to PyPI
-    if: github.event_name == 'push' && github.ref_name == 'release'
-    runs-on: [self-hosted, dedicated-1]
-    needs: build
-
-    container:
-      image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
-      options: --user root
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Install poetry
-        run: conda install -y poetry
-
-      - name: Publish to PyPI
-        env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          poetry config pypi-token.pypi "$PYPI_API_TOKEN"
-          make pypi-publish
+  conda-packages:
+    uses: simbricks/ci-workflows/.github/workflows/conda-packages.yml@v1
+    secrets: inherit
