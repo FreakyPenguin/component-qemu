@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 package:
-  name: simbricks-qemu-bin
+  name: simbricks-qemu-sim-bin
   version: {{ simbricks_version }}
 
 source:
@@ -61,7 +61,7 @@ requirements:
   run:
     # Pull in the SimBricks QEMU python integration so that installing the
     # simulator binary also provides its orchestration glue.
-    - simbricks-qemu-python =={{ simbricks_version }}
+    - simbricks-qemu-sim-py =={{ simbricks_version }}
 
 about:
   home: {{ homepage }}

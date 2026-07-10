@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-{% set name = "simbricks-qemu-python" %}
+{% set name = "simbricks-qemu-sim-py" %}
 
 package:
   name: {{ name|lower }}
