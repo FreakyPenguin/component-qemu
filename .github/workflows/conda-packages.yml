@@ -11,11 +11,11 @@ on:
 jobs:
   build:
     name: Build and upload conda packages
-    runs-on: self-hosted
+    runs-on: [self-hosted, dedicated-1]
 
     container:
       image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
-      options: --user root
+      #options: --user root
 
     steps:
       - name: Checkout (with QEMU submodule)
@@ -45,7 +45,7 @@ jobs:
 
   trigger-indexing:
     name: Trigger indexing of the conda channel to add the uploaded packages to the index
-    runs-on: self-hosted
+    runs-on: [self-hosted, dedicated-1]
     needs: build
 
     container:
