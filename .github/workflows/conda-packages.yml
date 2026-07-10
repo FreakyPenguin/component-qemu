@@ -6,7 +6,11 @@ on:
   push:
     branches:
       - main
+      - release
   workflow_dispatch:
+
+env:
+  CHANNEL: ${{ github.ref_name == 'release' && 'stable' || 'latest' }}
 
 jobs:
   build:
@@ -40,7 +44,7 @@ jobs:
             curl --fail --silent --show-error --location \
               --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
               --upload-file "$pkg" \
-              "https://conda.simbricks.io/latest/$dest"
+              "https://conda.simbricks.io/$CHANNEL/$dest"
           done
 
   trigger-indexing:
@@ -61,4 +65,5 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --request POST \
             --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
-            --url "https://gitlab.simbricks.io/api/v4/projects/23/pipeline?ref=main"
+            --url "https://gitlab.simbricks.io/api/v4/projects/23/pipeline?ref=main" \
+            --data '{"inputs": {"channel": "$CHANNEL"}}'
