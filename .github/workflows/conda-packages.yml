@@ -67,3 +67,29 @@ jobs:
             --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
             --url "https://gitlab.simbricks.io/api/v4/projects/23/pipeline?ref=main" \
             --data '{"inputs": {"channel": "$CHANNEL"}}'
+
+  pypi-publish:
+    name: Publish the python package to PyPI
+    if: github.event_name == 'push' && github.ref_name == 'release'
+    runs-on: [self-hosted, dedicated-1]
+
+    container:
+      image: registry.simbricks.io/internal/conda-docker-image/conda-build-env:latest
+      options: --user root
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install poetry
+        run: conda install -y poetry
+
+      - name: Publish to PyPI
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          poetry config pypi-token.pypi "$PYPI_API_TOKEN"
+          make pypi-publish
