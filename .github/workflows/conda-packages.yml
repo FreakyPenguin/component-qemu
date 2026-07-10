@@ -67,7 +67,7 @@ jobs:
             --header "PRIVATE-TOKEN: $REGISTRY_TOKEN" \
             --header "Content-Type: application/json" \
             --url "https://gitlab.simbricks.io/api/v4/projects/23/pipeline?ref=main" \
-            --data "{\"inputs\": {\"channel\": $CHANNEL}}"
+            --data "{\"inputs\": {\"channel\": \"$CHANNEL\"}}"
 
   pypi-publish:
     name: Publish the python package to PyPI
