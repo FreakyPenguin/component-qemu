@@ -9,5 +9,5 @@ on:
 
 jobs:
   conda-packages:
-    uses: simbricks/ci-workflows/.github/workflows/conda-packages.yml@v1
+    uses: simbricks/ci-workflows/.github/workflows/conda-packages.yml@v2
     secrets: inherit
