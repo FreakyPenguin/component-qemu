@@ -45,7 +45,7 @@ SIMB_CONDA_CHANNEL:= -c https://conda.simbricks.io/latest
 BASE_BUILD_CMD    := conda build $(SIMB_CONDA_CHANNEL) -m conda-recipes/conda_build_config.yaml $(OUTPUT_FLAG)
 
 .PHONY: all qemu-build qemu-install python-develop \
-        python-conda qemu-conda conda-packages clean
+        python-conda qemu-conda conda-packages pypi-build pypi-publish clean
 
 ## --- QEMU (C sources in qemu/) --------------------------------------------
 
@@ -99,7 +99,6 @@ conda-packages: python-conda qemu-conda
 ## --- PyPI packages ---------------------------------------------------------
 
 pypi-build:
-	rm -rf simbricks-qemu-python/dist
 	poetry build -C simbricks-qemu-python
 
 pypi-publish: pypi-build
@@ -115,3 +114,4 @@ all: conda-packages
 clean:
 	rm -f qemu/ready
 	-cd qemu && $(MAKE) clean
+	rm -rf simbricks-qemu-python/dist
