@@ -57,6 +57,16 @@ requirements:
     - elfutils
     - python
     - setuptools
+    - libcurl
+    - gnutls
+    - nettle
+    - zstd
+    - bzip2
+    - lzo
+    - ncurses
+    - libiconv
+    - python
+    - setuptools
 
   run:
     # Pull in the SimBricks QEMU python integration so that installing the
