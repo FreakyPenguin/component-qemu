@@ -22,7 +22,7 @@
 
 # Where "make qemu-install" places the QEMU binaries. Inside a conda build this
 # is the build prefix; for a local dev build override it, e.g. PREFIX=$(pwd)/out.
-PREFIX            ?= $(pwd)/out
+PREFIX            ?= $(CURDIR)/out
 
 # Location of the SimBricks headers/libraries QEMU's --enable-simbricks build
 # links against. Default to PREFIX; the conda recipe points these at the conda
