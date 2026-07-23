@@ -7,6 +7,4 @@ export CPP="${CC} -E"
 # SimBricks include/lib paths to point at the conda build prefix. The
 # qemu-install target depends on the build (qemu/ready) stamp, so this single
 # invocation configures, compiles, and installs into ${PREFIX}.
-make qemu-install \
-    SIMBRICKS_INC_DIR="${PREFIX}/include" \
-    SIMBRICKS_LIB_DIR="${PREFIX}/lib/simbricks"
+make qemu-install

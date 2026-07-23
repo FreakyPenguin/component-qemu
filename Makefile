@@ -28,7 +28,7 @@ PREFIX            ?= $(CURDIR)/out
 # links against. Default to PREFIX; the conda recipe points these at the conda
 # prefix. For local development set them to wherever simbricks-lib is installed.
 SIMBRICKS_INC_DIR ?= $(PREFIX)/include
-SIMBRICKS_LIB_DIR ?= $(PREFIX)/lib/simbricks
+SIMBRICKS_LIB_DIR ?= $(PREFIX)/lib
 
 # Compilers and python interpreter (overridable by conda / the environment).
 CC                ?= cc
