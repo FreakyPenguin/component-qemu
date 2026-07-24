@@ -46,6 +46,7 @@ class QemuSim(sim_host.HostSim):
             executable="qemu-system-x86_64",
         )
         self.name = f"QemuSim-{self._id}"
+        self.kernel_path = "global_input/images/bzImage"
         self._qemu_img_exec: str = "qemu-img"
 
     def resreq_cores(self) -> int:
@@ -60,12 +61,14 @@ class QemuSim(sim_host.HostSim):
     def toJSON(self) -> dict:
         json_obj = super().toJSON()
         # disks is created upon invocation of "prepare", hence we do not need to serialize it
+        json_obj["kernel_path"] = self.kernel_path
         json_obj["qemu_img_exec"] = self._qemu_img_exec
         return json_obj
 
     @classmethod
     def fromJSON(cls, simulation: sim_base.Simulation, json_obj: dict) -> tpe.Self:
         instance = super().fromJSON(simulation, json_obj)
+        instance.kernel_path = utils_base.get_json_attr_top(json_obj, "kernel_path")
         instance._qemu_img_exec = utils_base.get_json_attr_top(json_obj, "qemu_img_exec")
         return instance
 
@@ -121,7 +124,7 @@ class QemuSim(sim_host.HostSim):
         cmd = (
             f"{self._executable} -machine q35{accel} -serial mon:stdio "
             "-cpu Skylake-Server -display none -nic none "
-            f"-kernel {inst.env.repo_base('images/bzImage')} "
+            f"-kernel {inst.env.work_dir_or_abs(self.kernel_path, True)} "
         )
 
         full_sys_hosts = self.filter_components_by_type(ty=sys_host.BaseLinuxHost)
