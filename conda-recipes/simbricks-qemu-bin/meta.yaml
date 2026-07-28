@@ -28,8 +28,6 @@ source:
   # Build from the repo root, which holds the top-level Makefile and the qemu/
   # submodule with the QEMU C sources.
   path: ../../
-  patches:
-    - fix-typedef-object-c.patch
 
 build:
   number: 0
@@ -47,6 +45,8 @@ requirements:
     - bison
     - python
     - setuptools
+    - rust
+    - wheel
 
   host:
     - simbricks-lib >=0.4.2
@@ -63,6 +63,7 @@ requirements:
     - lzo
     - ncurses
     - libiconv
+    - libslirp
 
   run:
     # Pull in the SimBricks QEMU python integration so that installing the
