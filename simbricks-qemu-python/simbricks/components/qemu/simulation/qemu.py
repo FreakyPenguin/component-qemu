@@ -168,10 +168,10 @@ class QemuSim(sim_host.HostSim):
         if self.kernel_path is not None:
             cmd += f"-kernel {inst.env.work_dir_or_abs(self.kernel_path, True)} "
         else:
-            distro_disk = self._disk_images[0][0]
+            distro_disk = self._disk_images[host_spec][0][0]
             if isinstance(distro_disk, disk_images.DistroDiskImage):
                 imp = f"global_input/images/{distro_disk.name}/boot/vmlinuz"
-                cmd += f"-kernel {inst.env.work_dir_or_abs(imp, True)}"
+                cmd += f"-kernel {inst.env.work_dir_or_abs(imp, True)} "
             else:
                 raise RuntimeError("Neither a distro disk image nor a kernel path were specified")
         
