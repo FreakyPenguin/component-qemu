@@ -157,6 +157,11 @@ class QemuSim(sim_host.HostSim):
             "-cpu Skylake-Server -display none -nic none "
         )
 
+        full_sys_hosts = self.filter_components_by_type(ty=sys_host.BaseLinuxHost)
+        if len(full_sys_hosts) != 1:
+            raise Exception("QEMU only supports simulating 1 FullSystemHost")
+        host_spec = full_sys_hosts[0]
+
         if host_spec not in self._disk_images or len(self._disk_images) < 1:
             raise RuntimeError("QEMU requires at least one disk image")
 
@@ -172,11 +177,6 @@ class QemuSim(sim_host.HostSim):
         
         if self.initrd is not None:
             cmd += f" -initrd {inst.env.work_dir_or_abs(self.initrd, True)} "
-
-        full_sys_hosts = self.filter_components_by_type(ty=sys_host.BaseLinuxHost)
-        if len(full_sys_hosts) != 1:
-            raise Exception("QEMU only supports simulating 1 FullSystemHost")
-        host_spec = full_sys_hosts[0]
 
         kcmd_append = ""
         if host_spec.kcmd_append is not None:
