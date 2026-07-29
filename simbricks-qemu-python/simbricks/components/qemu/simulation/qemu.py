@@ -48,7 +48,7 @@ class QemuSim(sim_host.HostSim):
             executable="qemu-system-x86_64",
         )
         self.name = f"QemuSim-{self._id}"
-        self.kernel_path = "global_input/images/bzImage"
+        self.kernel_path: str | None = None
         self.initrd: str | None = None
         self._qemu_img_exec: str = "qemu-img"
 
@@ -88,16 +88,18 @@ class QemuSim(sim_host.HostSim):
     def toJSON(self) -> dict:
         json_obj = super().toJSON()
         # disks is created upon invocation of "prepare", hence we do not need to serialize it
-        json_obj["kernel_path"] = self.kernel_path
-        json_obj["initrd"] = self.initrd
+        if self.kernel_path:
+            json_obj["kernel_path"] = self.kernel_path
+        if self.initrd:
+            json_obj["initrd"] = self.initrd
         json_obj["qemu_img_exec"] = self._qemu_img_exec
         return json_obj
 
     @classmethod
     def fromJSON(cls, simulation: sim_base.Simulation, json_obj: dict) -> tpe.Self:
         instance = super().fromJSON(simulation, json_obj)
-        instance.kernel_path = utils_base.get_json_attr_top(json_obj, "kernel_path")
-        instance.initrd = utils_base.get_json_attr_top(json_obj, "initrd") 
+        instance.kernel_path = utils_base.get_json_attr_top_or_none(json_obj, "kernel_path")
+        instance.initrd = utils_base.get_json_attr_top_or_none(json_obj, "initrd") 
         instance._qemu_img_exec = utils_base.get_json_attr_top(json_obj, "qemu_img_exec")
         return instance
 
@@ -153,9 +155,21 @@ class QemuSim(sim_host.HostSim):
         cmd = (
             f"{self._executable} -machine q35{accel} -serial mon:stdio "
             "-cpu Skylake-Server -display none -nic none "
-            f"-kernel {inst.env.work_dir_or_abs(self.kernel_path, True)} "
         )
 
+        if host_spec not in self._disk_images or len(self._disk_images) < 1:
+            raise RuntimeError("QEMU requires at least one disk image")
+
+        if self.kernel_path is not None:
+            cmd += f"-kernel {inst.env.work_dir_or_abs(self.kernel_path, True)} "
+        else:
+            distro_disk = self._disk_images[0][0]
+            if isinstance(distro_disk, disk_images.DistroDiskImage):
+                imp = f"global_input/images/{distro_disk.name}/vmlinuz"
+                cmd += f"-kernel {inst.env.work_dir_or_abs(imp, True)}"
+            else:
+                raise RuntimeError("Neither a distro disk image nor a kernel path were specified")
+        
         if self.initrd is not None:
             cmd += f" -initrd {inst.env.work_dir_or_abs(self.initrd, True)} "
 
@@ -168,7 +182,6 @@ class QemuSim(sim_host.HostSim):
         if host_spec.kcmd_append is not None:
             kcmd_append = " " + host_spec.kcmd_append
 
-        assert host_spec in self._disk_images
         for index, disk in enumerate(self._disk_images[host_spec]):
             format = disk[0].find_format(self)
             cmd += f"-drive file={disk[1]},if=ide,index={index},media=disk,driver={format} "
