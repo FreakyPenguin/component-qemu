@@ -99,6 +99,14 @@ class QemuSim(sim_host.HostSim):
     def supported_image_formats(self) -> list[str]:
         return ["qcow2", "raw"]
 
+    async def prepare(self, inst: inst_base.Instantiation) -> None:
+        await super().prepare(inst)
+        # An explicit kernel_path overrides the image's own, so only fetch when unset.
+        if self.kernel_path is not None:
+            return
+        for host in self.filter_components_by_type(ty=sys_host.FullSystemHost):
+            await self.pull_boot_artifacts(inst, host, [disk_images.BootArtifact.VMLINUZ])
+
     def toJSON(self) -> dict:
         json_obj = super().toJSON()
         if self.machine:
@@ -194,13 +202,9 @@ class QemuSim(sim_host.HostSim):
         if self.kernel_path is not None:
             cmd += f"-kernel {inst.env.work_dir_or_abs(self.kernel_path, True)} "
         else:
-            distro_disk = self._disk_images[host_spec][0][0]
-            if isinstance(distro_disk, disk_images.DistroDiskImage):
-                imp = f"global_input/images/{distro_disk.name}/boot/vmlinuz"
-                cmd += f"-kernel {inst.env.work_dir_or_abs(imp, True)} "
-            else:
-                raise RuntimeError("Neither a distro disk image nor a kernel path were specified")
-        
+            kernel = self.boot_artifact(host_spec, disk_images.BootArtifact.VMLINUZ)
+            cmd += f"-kernel {kernel} "
+
         if self.initrd is not None:
             cmd += f" -initrd {inst.env.work_dir_or_abs(self.initrd, True)} "
 
